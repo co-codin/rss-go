@@ -11,6 +11,10 @@ import (
 	"github.com/go-chi/cors"
 )
 
+type apiConfig struct {
+	DB *database.Queries
+}
+
 func main() {
 	
 
