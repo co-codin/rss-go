@@ -1,14 +1,17 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
+	"rss/internal/database"
 
 	"github.com/joho/godotenv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
+	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
@@ -16,13 +19,28 @@ type apiConfig struct {
 }
 
 func main() {
-	
 
 	godotenv.Load(".env")
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("PORT is not found")
+	}
+
+	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		log.Fatal("DB_URL is not found")
+	}
+
+	conn, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dbQueries := database.New(conn)
+
+	apiConfig := apiConfig{
+		DB: dbQueries,
 	}
 	
 	router := chi.NewRouter()
