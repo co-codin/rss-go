@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"rss/internal/auth"
 	"rss/internal/database"
 	"time"
 
@@ -39,5 +40,20 @@ func (apiCfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Reque
 }
 
 func (apiCfg *apiConfig) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetAPIKey(r.Header)
+
+	if err != nil {
+		respondWithError(w, 403, fmt.Sprintf("invalid api key"))
+		return
+	}
+
+	user, err := apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("cannot get user"))
+		return
+	}
 	
+
+	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
