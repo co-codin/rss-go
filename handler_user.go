@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"rss/internal/auth"
 	"rss/internal/database"
 	"time"
 
@@ -25,8 +24,8 @@ func (apiCfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Reque
 	}
 
 	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
-		ID: uuid.New(),
-		Name: params.Name,
+		ID:        uuid.New(),
+		Name:      params.Name,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	})
