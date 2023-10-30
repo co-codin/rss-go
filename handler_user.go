@@ -39,21 +39,6 @@ func (apiCfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Reque
 	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
 
-func (apiCfg *apiConfig) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
-	apiKey, err := auth.GetAPIKey(r.Header)
-
-	if err != nil {
-		respondWithError(w, 403, fmt.Sprintf("invalid api key"))
-		return
-	}
-
-	user, err := apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
-
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("cannot get user"))
-		return
-	}
-	
-
+func (apiCfg *apiConfig) handlerUsersGet(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
