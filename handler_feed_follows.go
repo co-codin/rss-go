@@ -7,6 +7,7 @@ import (
 	"rss/internal/database"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 )
 
@@ -41,9 +42,8 @@ func (apiCfg *apiConfig) handlerCreateFeedFollow(w http.ResponseWriter, r *http.
 }
 
 func (apiCfg *apiConfig) handlerGetFeedFollows(w http.ResponseWriter, r *http.Request, user database.User) {
-	
 
-	feedFollows, err := apiCfg.DB.GetFeedFollows(r.Context(), user.ID)
+	feedFollows, err := apiCfg.DB.GetFeedFollowsForUser(r.Context(), user.ID)
 
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("cannot get feed follows"))
@@ -51,4 +51,25 @@ func (apiCfg *apiConfig) handlerGetFeedFollows(w http.ResponseWriter, r *http.Re
 	}
 
 	respondWithJSON(w, http.StatusOK, databaseFeedFollowsToFeedFollows(feedFollows))
+}
+
+func (apiCfg *apiConfig) handlerDeleteFeedFollows(w http.ResponseWriter, r *http.Request, user database.User) {
+	feedFollowIDStr := chi.URLParam(r, "feedFollowID")
+	feedFollowID, err := uuid.Parse(feedFollowIDStr)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid feed follow ID")
+		return
+	}
+
+	err = apiCfg.DB.DeleteFeedFollow(r.Context(), database.DeleteFeedFollowParams{
+		UserID: user.ID,
+		ID:     feedFollowID,
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create feed follow")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, struct{}{})
 }
