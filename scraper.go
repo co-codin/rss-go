@@ -3,9 +3,20 @@ package main
 import (
 	"encoding/xml"
 	"io"
+	"log"
 	"net/http"
+	"rss/internal/database"
 	"time"
 )
+
+func startScraping(db *database.Queries, concurrency int, timeBetweenRequest time.Duration) {
+	log.Printf("Collecting feeds every %s on %v goroutines...", timeBetweenRequest, concurrency)
+	ticker := time.NewTicker(timeBetweenRequest)
+	for ; ; <-ticker.C {
+		
+	}
+
+}
 
 type RSSFeed struct {
 	Channel struct {
