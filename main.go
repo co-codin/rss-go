@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"rss/internal/database"
+	"time"
 
 	"github.com/joho/godotenv"
 
@@ -42,7 +43,7 @@ func main() {
 	apiConfig := apiConfig{
 		DB: dbQueries,
 	}
-	
+
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
@@ -53,7 +54,6 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-
 
 	v1Router := chi.NewRouter()
 	v1Router.Get("/healthz", handlerReadiness)
@@ -69,13 +69,16 @@ func main() {
 	v1Router.Post("/feed_follows", apiConfig.middlewareAuth(apiConfig.handlerCreateFeedFollow))
 	v1Router.Delete("/feed_follows/{feedFollowID}", apiConfig.middlewareAuth(apiConfig.handlerDeleteFeedFollows))
 
-
 	router.Mount("/v1", v1Router)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
 		Handler: router,
 	}
+
+	const collectionConcurrency = 10
+	const collectionInterval = time.Minute
+	go startScraping(dbQueries, collectionConcurrency, collectionInterval)
 
 	log.Printf("Serving on port: %s\n", port)
 	log.Fatal(srv.ListenAndServe())
